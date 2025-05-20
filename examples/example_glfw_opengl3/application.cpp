@@ -7,6 +7,7 @@
 #include <nlohmann/json.hpp> // Include the JSON library
 #include <fstream>           // For file I/O
 #include <iostream>
+#include "ImageHandler.h"
 
 namespace app {
     std::vector<PanelState> panels;
@@ -90,30 +91,43 @@ void NavBar() {
     if (NewPanelPopup) { // Check if the popup should be open
         if (ImGui::Begin("New Panel", &NewPanelPopup, ImGuiWindowFlags_NoDocking)) {
             ImGui::Text("Select a panel to create:");
-            if (ImGui::Button("File Manager")) {
-                app::panels.push_back({ true, false, ImGuiDockNodeFlags_None, app::FileManager });
-                NewPanelPopup = false; // Close the popup
-            }
-            if (ImGui::Button("System Monitor")) {
-                app::panels.push_back({ true, false, ImGuiDockNodeFlags_None, app::SystemMonitor });
-                NewPanelPopup = false; // Close the popup
-            }
-            if (ImGui::Button("Task Manager")) {
-                app::panels.push_back({ true, false, ImGuiDockNodeFlags_None, app::TaskManager });
-                NewPanelPopup = false; // Close the popup
-            }
-            if (ImGui::Button("Console")) {
-                app::panels.push_back({ true, false, ImGuiDockNodeFlags_None, app::Console });
-                NewPanelPopup = false; // Close the popup
-            }
-            if (ImGui::Button("Log")) {
-                app::panels.push_back({ true, false, ImGuiDockNodeFlags_None, app::Log });
-                NewPanelPopup = false; // Close the popup
-            }
+
             if (ImGui::Button("Settings")) {
                 app::panels.push_back({ true, false, ImGuiDockNodeFlags_None, app::Settings });
                 NewPanelPopup = false; // Close the popup
+                ImGui::End(); // End the window only if it was successfully created
+                return;
+            }if (ImGui::Button("Console")) {
+                app::panels.push_back({ true, false, ImGuiDockNodeFlags_None, app::Console });
+                NewPanelPopup = false; // Close the popup
+                ImGui::End(); // End the window only if it was successfully created
+                return;
+            }if (ImGui::Button("Log")) {
+                app::panels.push_back({ true, false, ImGuiDockNodeFlags_None, app::Log });
+                NewPanelPopup = false; // Close the popup
+                ImGui::End(); // End the window only if it was successfully created
+                return;
+            }if (ImGui::Button("File Manager")) {
+                app::panels.push_back({ true, false, ImGuiDockNodeFlags_None, app::FileManager });
+                NewPanelPopup = false; // Close the popup
+                ImGui::End(); // End the window only if it was successfully created
+                return;
+            }if (ImGui::Button("System Monitor")) {
+                app::panels.push_back({ true, false, ImGuiDockNodeFlags_None, app::SystemMonitor });
+                NewPanelPopup = false; // Close the popup
+                ImGui::End(); // End the window only if it was successfully created
+                return;
+            }if (ImGui::Button("Task Manager")) {
+                app::panels.push_back({ true, false, ImGuiDockNodeFlags_None, app::TaskManager });
+                NewPanelPopup = false; // Close the popup
+                ImGui::End(); // End the window only if it was successfully created
+                return;
+            }if (ImGui::Button("DirTemplator")) {
+                app::panels.push_back({ true, false, ImGuiDockNodeFlags_None, app::DirTemplator });
+                NewPanelPopup = false; // Close the popup
+                ImGui::End(); // End the window only if it was successfully created
             }
+
 
             ImGui::End(); // End the window only if it was successfully created
         }
@@ -146,18 +160,41 @@ void HandlePanels() {
 
 
 namespace app {
+    ImFont* font_body = nullptr;
+    int iconW = 18, iconH = 18;
+    int ImgFolderWidth = 0, ImgFolderHeight = 0;
+    GLuint myIcon = 0;
+    ImTextureID FolderIcon = 0;
+
     void startup() {
         LoadPanelsFromFile("panels.json"); // Load panels from a file
+        
+        
+        ImGuiIO& io = ImGui::GetIO();
+        font_body = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\Roboto-Regular.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesDefault());
+        
+        IM_ASSERT(font_body != NULL);
+        
+        myIcon = LoadIconTexture( "C:\\Users\\rasmu\\Desktop\\VulpynSuite\\examples\\example_glfw_opengl3\\Debug\\assets\\folder.png" /*"assets/folder.png"*/, &ImgFolderWidth, &ImgFolderHeight);
+        FolderIcon = (ImTextureID)(intptr_t)myIcon;
     }
 
     void ImGuiLoop() {
+        ImGui::PushFont(font_body);
         ImGui::DockSpaceOverViewport(0, ImGui::GetWindowViewport());
         // Navigation bar
         NavBar();
 
         HandlePanels();
 
+        ImGui::Begin("testing");
+        {
+            ImGui::Image(FolderIcon, ImVec2(iconW, iconH));
+        }
+        ImGui::End();
+
         ImGui::ShowDemoWindow();
+        ImGui::PopFont();
     }
 
     void ImGuiRenderLoop(GLFWwindow* window) {

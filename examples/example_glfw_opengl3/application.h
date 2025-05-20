@@ -11,8 +11,13 @@ namespace app {
         TaskManager,
         Console,
         Log,
-        Settings
+        Settings,
+        DirTemplator
     };
+
+    extern int iconW, iconH;
+    extern GLuint myIcon;
+    extern ImTextureID FolderIcon;
 
     struct PanelState {
         bool open = true;

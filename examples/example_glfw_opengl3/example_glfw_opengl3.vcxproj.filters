@@ -43,6 +43,9 @@
     <ClCompile Include="FileManager.cpp">
       <Filter>Application</Filter>
     </ClCompile>
+    <ClCompile Include="ImageHandler.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -64,6 +67,9 @@
       <Filter>sources</Filter>
     </ClInclude>
     <ClInclude Include="application.h">
+      <Filter>Application</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageHandler.h">
       <Filter>Application</Filter>
     </ClInclude>
   </ItemGroup>
