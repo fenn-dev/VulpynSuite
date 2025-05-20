@@ -114,25 +114,24 @@ namespace app {
         }
 
         // Now render modal
-        if (ImGui::BeginPopupModal("Rename File Modal", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-            static char newName[128] = "";
-            static std::string lastFile;
+        static char newName[128] = "";
+        static bool renameInitialized = false;
 
-            // Only update newName if the focused file changes
-            if (lastFile != FocusedFile.string()) {
-                strncpy(newName, FocusedFile.filename().string().c_str(), sizeof(newName) - 1);
-                newName[sizeof(newName) - 1] = '\0';
-                lastFile = FocusedFile.string();
-            }
+        if (ImGui::BeginPopupModal("Rename File Modal", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+            // Replace the line causing the error:  
+            // newName = FocusedFile.string().c_str();  
+            static char newName[128];
+            // Fix: Use strncpy to copy the string into the char array.  
+            strncpy(newName, FocusedFile.string().c_str(), sizeof(newName) - 1);  
+            newName[sizeof(newName) - 1] = '\0'; // Ensure null termination
+
 
             ImGui::Text("Enter new name:");
             ImGui::InputText("##newname", newName, IM_ARRAYSIZE(newName));
 
             if (ImGui::Button("OK")) {
-                fs::path newFilePath = FocusedFile.parent_path() / newName;
-                std::error_code ec;
-                fs::rename(FocusedFile, newFilePath, ec);
-                if (!ec) {
+                // Handle rename
+                if (std::rename(FocusedFile.string().c_str(), (FocusedFile.parent_path().string() + "\\" + newName).c_str()) == 0) {
                     std::cout << "File renamed successfully.\n";
                     FocusedFile = newFilePath;
                 }
@@ -140,14 +139,17 @@ namespace app {
                     std::cerr << "Error renaming file: " << ec.message() << std::endl;
                 }
                 ImGui::CloseCurrentPopup();
+                renameInitialized = false; // Reset for next time
             }
             ImGui::SameLine();
             if (ImGui::Button("Cancel")) {
                 ImGui::CloseCurrentPopup();
+                renameInitialized = false; // Reset for next time
             }
 
             ImGui::EndPopup();
         }
+
     }
 
     void FileManagerApp(PanelState& panel) {
@@ -160,6 +162,16 @@ namespace app {
                     rootFolder = rootFolder.parent_path();
                 }
             }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Refresh")) {
+                // Refresh logic can be added here
+            }
+
+            ImGui::SameLine();
+
+
 
             ParseFolderAndSubFolders(rootFolder);
 
