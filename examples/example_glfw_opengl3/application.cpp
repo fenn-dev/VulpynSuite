@@ -1,13 +1,19 @@
 #include "application.h"
 #include <GLFW/glfw3.h>
 #include <imgui.h>
-#include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <vector>
 #include <nlohmann/json.hpp> // Include the JSON library
 #include <fstream>           // For file I/O
 #include <iostream>
 #include "ImageHandler.h"
+#include <filesystem>
+#include "settings.h"
+
+#include "FileIcon.h"
+#include "imgui_impl_glfw.h"
+
+namespace fs = std::filesystem;
 
 namespace app {
     std::vector<PanelState> panels;
@@ -141,7 +147,12 @@ void HandlePanels() {
             case app::FileManager:
                 app::FileManagerApp(panel);
                 break;
-                // Add cases for other panel types here if needed
+            case app::Settings:
+                app::SettingsApp(panel);
+                break;
+            case app::DirTemplator:
+                app::DirTemplatorApp(panel);
+
             default:
                 break;
             }
@@ -157,42 +168,61 @@ void HandlePanels() {
 }
 
 
-
-
 namespace app {
     ImFont* font_body = nullptr;
-    int iconW = 18, iconH = 18;
+    ImFont* Font_File_Explorer = nullptr;
+    float iconW = 18.0f, iconH = 18.0f;
     int ImgFolderWidth = 0, ImgFolderHeight = 0;
-    GLuint myIcon = 0;
+    int ImgFileWidth = 0, ImgFileHeight = 0;
+    GLuint GL_FolderIcon = 0;
     ImTextureID FolderIcon = 0;
 
     void startup() {
-        LoadPanelsFromFile("panels.json"); // Load panels from a file
-        
-        
+        LoadPanelsFromFile("panels.json");
         ImGuiIO& io = ImGui::GetIO();
-        font_body = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\Roboto-Regular.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesDefault());
-        
-        IM_ASSERT(font_body != NULL);
-        
-        myIcon = LoadIconTexture( "C:\\Users\\rasmu\\Desktop\\VulpynSuite\\examples\\example_glfw_opengl3\\Debug\\assets\\folder.png" /*"assets/folder.png"*/, &ImgFolderWidth, &ImgFolderHeight);
-        FolderIcon = (ImTextureID)(intptr_t)myIcon;
+
+        font_body = io.Fonts->AddFontFromFileTTF(settings::FileExplorer_Font.c_str(), 18.0f, NULL, io.Fonts->GetGlyphRangesDefault());
+        if (!font_body) {
+            std::cerr << "Failed to load font_body! Falling back to default font." << std::endl;
+        }
+        Font_File_Explorer = io.Fonts->AddFontFromFileTTF(settings::FileExplorer_Font.c_str(), settings::FileExplorer_FontSize, NULL, io.Fonts->GetGlyphRangesDefault());
+        if (!Font_File_Explorer) {
+            std::cerr << "Failed to load Font_File_Explorer! Falling back to default font." << std::endl;
+        }
+
+        GL_FolderIcon = LoadIconTexture("C:\\Users\\rasmu\\Desktop\\VulpynSuite\\examples\\example_glfw_opengl3\\assets\\folder.png", &ImgFolderWidth, &ImgFolderHeight);
+        FolderIcon = (ImTextureID)(intptr_t)GL_FolderIcon;
+
+        iconhandler::initIconMap();
     }
 
     void ImGuiLoop() {
-        ImGui::PushFont(font_body);
-        ImGui::DockSpaceOverViewport(0, ImGui::GetWindowViewport());
-        // Navigation bar
-        NavBar();
-
-        HandlePanels();
-
-        ImGui::Begin("testing");
+        if (g_NeedsFontReload)
         {
-            ImGui::Image(FolderIcon, ImVec2(iconW, iconH));
+            ImGuiIO& io = ImGui::GetIO();
+            io.Fonts->Clear();
+            font_body = io.Fonts->AddFontFromFileTTF(settings::FileExplorer_Font.c_str(), 18.0f, NULL, io.Fonts->GetGlyphRangesDefault());
+            Font_File_Explorer = io.Fonts->AddFontFromFileTTF(settings::FileExplorer_Font.c_str(), settings::FileExplorer_FontSize, NULL, io.Fonts->GetGlyphRangesDefault());
+            io.Fonts->Build();
+            ImGui_ImplOpenGL3_DestroyFontsTexture();
+            ImGui_ImplOpenGL3_CreateFontsTexture();
+            iconhandler::initIconMap();
+            g_NeedsFontReload = false;
         }
-        ImGui::End();
 
+        // Start the Dear ImGui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        if (font_body)
+            ImGui::PushFont(font_body);
+        else
+            ImGui::PushFont(ImGui::GetFont()); // fallback to default font
+
+        ImGui::DockSpaceOverViewport(0, ImGui::GetWindowViewport());
+        NavBar();
+        HandlePanels();
         ImGui::ShowDemoWindow();
         ImGui::PopFont();
     }

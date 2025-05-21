@@ -3,8 +3,12 @@
 #include <vector>
 #include <imgui.h>
 #include <random>
+#include <filesystem>
+#include <vector>
+
 
 namespace app {
+
     enum Panel {
         FileManager,
         SystemMonitor,
@@ -15,9 +19,13 @@ namespace app {
         DirTemplator
     };
 
-    extern int iconW, iconH;
-    extern GLuint myIcon;
+    extern float iconW, iconH;
     extern ImTextureID FolderIcon;
+
+    extern ImFont* Font_File_Explorer;
+    inline bool g_NeedsFontReload = false;
+
+    extern std::filesystem::path FocusedFile;
 
     struct PanelState {
         bool open = true;
@@ -29,7 +37,9 @@ namespace app {
 
     extern std::vector<PanelState> panels; // Declare as extern
 
+    void SettingsApp(PanelState& panel);
     void FileManagerApp(PanelState& panel);
+    void DirTemplatorApp(PanelState& panel);
 
     void startup();
     void ImGuiLoop();

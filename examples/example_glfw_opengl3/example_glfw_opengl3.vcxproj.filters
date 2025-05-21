@@ -46,6 +46,15 @@
     <ClCompile Include="ImageHandler.cpp">
       <Filter>Application</Filter>
     </ClCompile>
+    <ClCompile Include="FileIcon.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
+    <ClCompile Include="settings.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
+    <ClCompile Include="DirTemplator.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -72,14 +81,25 @@
     <ClInclude Include="ImageHandler.h">
       <Filter>Application</Filter>
     </ClInclude>
+    <ClInclude Include="FileIcon.h">
+      <Filter>Application</Filter>
+    </ClInclude>
+    <ClInclude Include="settings.h">
+      <Filter>Application</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\README.txt" />
     <None Include="..\..\misc\debuggers\imgui.natvis">
       <Filter>imgui</Filter>
     </None>
     <None Include="..\..\misc\debuggers\imgui.natstepfilter">
       <Filter>imgui</Filter>
+    </None>
+    <None Include="..\README.txt">
+      <Filter>Application</Filter>
+    </None>
+    <None Include="template.cpp.template">
+      <Filter>Application</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -1,0 +1,14 @@
+#include "application.h"
+
+namespace app
+{
+    void DirTemplatorApp(PanelState& panel)
+    {
+        std::string windowTitle = "Settings##" + std::to_string(panel.uid);
+
+        if (ImGui::Begin(windowTitle.c_str(), &panel.open)) {
+            
+        }
+        ImGui::End();
+    }
+}

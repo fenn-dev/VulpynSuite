@@ -6,14 +6,12 @@
 #include <Windows.h>
 #include <cstdio>
 
+#include "FileIcon.h"
+#include "settings.h"
+
 namespace fs = std::filesystem;
 
 namespace app {
-
-    bool ShowFileSize;
-
-    fs::path FocusedFile;
-
     fs::path rootFolder = "C:\\Users\\rasmu\\Documents\\TestingFolder"; //"C:/";
 
     // Check if a directory is accessible (non-throwing)
@@ -54,7 +52,15 @@ namespace app {
 
                 // Display folder name (red if inaccessible)
                 if (accessible) {
+                    bool TreeOpen = false;
                     if (ImGui::TreeNode(entryPath.filename().string().c_str())) {
+                        if (settings::FileExplorer_ShowFileIcon)
+                        {
+                            ImGui::SameLine();
+                            ImGui::Image(FolderIcon, ImVec2(settings::FileExplorer_FontSize, settings::FileExplorer_FontSize));
+                        }
+
+                        TreeOpen = true;
                         ParseFolderAndSubFolders(entryPath);
                         ImGui::TreePop();
                     }
@@ -64,12 +70,13 @@ namespace app {
                         ParseFolderAndSubFolders(rootFolder);
                         return;
                     }
-
-                    ImGui::SameLine();
-
-                    ImGui::Image(FolderIcon, ImVec2(iconW, iconH));
+                    if (!TreeOpen && settings::FileExplorer_ShowFileIcon)
+                    {
+                        ImGui::SameLine();
+                        ImGui::Image(FolderIcon, ImVec2(settings::FileExplorer_FontSize, settings::FileExplorer_FontSize));
+                    }
                 }
-                else {
+                else if (settings::FileExplorer_ShowDeniedFile){
                     ImGui::TextColored(ImVec4(1, 0, 0, 1), "%s (Access Denied)", entryPath.filename().string().c_str());
                     if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
                         // Optional: add your UAC elevation logic here if desired
@@ -78,13 +85,30 @@ namespace app {
                 }
             }
             else if (fs::is_regular_file(entryPath, ec)) {
-                ImGui::Selectable(entryPath.filename().string().c_str());
-                // Checks if the selectable has been right clicked
+                std::string label = settings::FileExplorer_ShowFileType
+                    ? entryPath.filename().string()
+                    : entryPath.stem().string() + "##" + entryPath.extension().string();
+                ImGui::Selectable(label.c_str());
                 if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
                     FocusedFile = entryPath;
                     ImGui::OpenPopup("FileProperties");
                 }
+
+                if (settings::FileExplorer_ShowFileIcon)
+                {
+                    ImGui::SameLine();
+                    std::string fileType = entryPath.extension().string();
+                    if (!fileType.empty() && fileType[0] == '.') {
+                        fileType = fileType.substr(1); // Remove leading dot
+                    }
+                    if (fileType.empty()) {
+                        fileType = "file"; // Default type if no extension
+                    }
+                    std::transform(fileType.begin(), fileType.end(), fileType.begin(), ::tolower);
+                    iconhandler::displayICON(fileType, settings::FileExplorer_FontSize);
+                }
             }
+
         }
     }
 
@@ -118,12 +142,12 @@ namespace app {
         static bool renameInitialized = false;
 
         if (ImGui::BeginPopupModal("Rename File Modal", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-            static char newName[128] = "";
+            static char newName[128] = ""; // Keep only this declaration
             static std::string lastFile;
 
             // Only update newName if the focused file changes
             if (lastFile != FocusedFile.string()) {
-                strncpy(newName, FocusedFile.filename().string().c_str(), sizeof(newName) - 1);
+                strncpy_s(newName, sizeof(newName), FocusedFile.filename().string().c_str(), _TRUNCATE);
                 newName[sizeof(newName) - 1] = '\0';
                 lastFile = FocusedFile.string();
             }
@@ -152,12 +176,16 @@ namespace app {
             ImGui::EndPopup();
         }
 
+
     }
 
     void FileManagerApp(PanelState& panel) {
         std::string windowTitle = "File Manager##" + std::to_string(panel.uid);
 
-        if (ImGui::Begin(windowTitle.c_str(), &panel.open)) {
+        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_HorizontalScrollbar;
+        if (ImGui::Begin(windowTitle.c_str(), &panel.open, windowFlags)) {
+            ImGui::PushFont(Font_File_Explorer);
+
             ImGui::Text("Current Folder: %s", rootFolder.string().c_str());
             if (ImGui::Button("Go Up")) {
                 if (rootFolder.has_parent_path()) {
@@ -171,13 +199,10 @@ namespace app {
                 // Refresh logic can be added here
             }
 
-            ImGui::SameLine();
-
-
-
             ParseFolderAndSubFolders(rootFolder);
 
             popups();
+            ImGui::PopFont();
         }
         ImGui::End();
     }
