@@ -1,0 +1,22 @@
+{
+    "Folder": {
+        "Name": "Images",
+        "Icon": "default",
+        "content": [
+            {
+                "Folder": {
+                    "Name": "JPG",
+                    "Icon": "default",
+                    "magnetic": [".jpg"]
+                }
+            },
+            {
+                "Folder": {
+                    "Name": "PNG",
+                    "Icon": "default",
+                    "magnetic": [".png"]
+                }
+            }
+        ]
+    }
+}

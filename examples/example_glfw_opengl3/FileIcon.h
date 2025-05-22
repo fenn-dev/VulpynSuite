@@ -9,7 +9,7 @@
 namespace iconhandler
 {
     extern std::unordered_map<std::string, ImTextureID> iconMap;
-    inline std::filesystem::path iconFolderPath = "C:\\Users\\rasmu\\Desktop\\VulpynSuite\\examples\\example_glfw_opengl3\\assets\\";
+    inline std::filesystem::path iconFolderPath = "C:\\Users\\rasmu\\Desktop\\VulpynSuite\\examples\\example_glfw_opengl3\\assets\\icons\\";
 
     void initIconMap();
     void displayICON(const std::string& fileType, float Scale = 24.0f);

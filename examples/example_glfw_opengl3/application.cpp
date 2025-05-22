@@ -132,6 +132,7 @@ void NavBar() {
                 app::panels.push_back({ true, false, ImGuiDockNodeFlags_None, app::DirTemplator });
                 NewPanelPopup = false; // Close the popup
                 ImGui::End(); // End the window only if it was successfully created
+                return;
             }
 
 
@@ -152,7 +153,7 @@ void HandlePanels() {
                 break;
             case app::DirTemplator:
                 app::DirTemplatorApp(panel);
-
+                break;
             default:
                 break;
             }

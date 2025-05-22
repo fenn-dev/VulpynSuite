@@ -12,6 +12,7 @@
 namespace fs = std::filesystem;
 
 namespace app {
+    std::filesystem::path FocusedFile;
     fs::path rootFolder = "C:\\Users\\rasmu\\Documents\\TestingFolder"; //"C:/";
 
     // Check if a directory is accessible (non-throwing)
